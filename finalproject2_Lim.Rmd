@@ -1,0 +1,48 @@
+---
+title: "ELOVL2 Methylation, Age, and Alzheimer's Disease"
+author: "Sheena Lim"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(ggplot2)
+```
+
+# Introduction
+
+This report uses the *Age Assessment & Disease Risk Prediction* dataset from
+Kaggle (https://www.kaggle.com/datasets/marquis03/age-assessment-and-disease-risk-prediction).
+
+The training set contains 8,233 samples, with 6,266 being healthy controls, and the remainder diseased. For each sample, it provides DNA methylation values at 485,512 CpG sites, along with chronological age, gender, and disease status. For this report, we focused on the healthy controls and the samples from individuals with Alzheimer's disease.
+
+
+Methylation at some CpG sites changes steadily with age, with one of the most prominent being cg16867657, located in the *ELOVL2* gene. This CpG site notaby increases methlyation with age, thus, the objective of this report is to test whether
+Alzheimer's samples have higher ELOVL2 methylation than controls of the same
+chronological age, which would suggest accelerated biological aging.
+
+```{r load-data}
+data <- readRDS(here::here("output/data_clean.rds"))
+```
+
+# Results
+
+```{r table}
+table_one <- readRDS(here::here("output/table_one.rds"))   
+fit <- readRDS(here::here("output/fit.rds"))
+knitr::kable(table_one, caption = "Table 1. Linear regression of ELOVL2 methylation on age and Alzheimer's status.")
+```
+
+Table 1 shows the results of regressing ELOVL2 methylation on chronological age
+and Alzheimer's status, using `r nobs(fit)` samples. Each additional year of age
+is associated with an increase of `r signif(coef(fit)[2], 2)` in methylation.
+Holding age constant, Alzheimer's samples had methylation values
+`r abs(round(coef(fit)[3], 2))` lower than controls on average
+(p `r format.pval(table_one[3, 4], digits = 2, eps = 0.001)`).
+
+```{r figure, out.width = "90%"}
+knitr::include_graphics(here::here("output/figure_one.png"))   # made by code/03_make_figure.R
+```
+
+Figure 1 plots ELOVL2 methylation against chronological age for each sample with a line of best fit for each group. Methylation rises with age in both groups.
